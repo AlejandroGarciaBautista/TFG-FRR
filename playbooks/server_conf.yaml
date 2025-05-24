@@ -1,0 +1,44 @@
+# playbooks/server_conf_docker_exec.yaml
+- name: Configurar los servidores
+  hosts: servers
+  gather_facts: no
+  connection: local
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+    - name: Configurar IP del servidor con docker exec
+      shell: |
+        docker exec {{ hostvars[inventory_hostname].ansible_docker_container }} vtysh \
+          -c "configure terminal" \
+          -c "interface eth1" \
+          -c "ip address {{ hostvars[inventory_hostname].server_net_ip }}/24" \
+          -c "exit" \
+          -c "ip route 0.0.0.0/0 {{ hostvars[inventory_hostname].gateway }}" \
+          -c "exit"
+      when: hostvars[inventory_hostname].server_net_ip is defined
+
+    - name: Configurar BGP del servidor con docker exec
+      shell: |
+        docker exec {{ hostvars[inventory_hostname].ansible_docker_container }} vtysh \
+          -c "configure terminal" \
+          -c "router bgp 65100" \
+          -c "neighbor leafs peer-group" \
+          -c "neighbor leafs remote-as 65100" \
+          -c "exit" \
+          -c "exit"
+
+    - name: Configurar vecinos leafs con docker exec
+      shell: |
+        cmd="docker exec {{ hostvars[inventory_hostname].ansible_docker_container }} vtysh -c 'configure terminal' -c 'router bgp 65100'"
+        {% for ip in hostvars[inventory_hostname].leafs %}
+        cmd+=" -c 'neighbor {{ ip }} peer-group leafs'"
+        {% endfor %}
+        cmd+=" -c 'address-family l2vpn evpn' -c 'neighbor leafs activate' -c 'advertise-all-vni'"
+        cmd+=" -c 'exit' -c 'exit' -c 'exit'"
+        bash -c "$cmd"
+      when: hostvars[inventory_hostname].leafs is defined
+
+    - name: Guardar configuración del servidor con docker exec
+      shell: |
+        docker exec {{ hostvars[inventory_hostname].ansible_docker_container }} vtysh -c "copy running-config startup-config"

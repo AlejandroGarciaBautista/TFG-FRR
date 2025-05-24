@@ -1,0 +1,57 @@
+# playbooks/spine_conf_docker_exec.yaml
+- name: Configurar los spines
+  hosts: spines
+  gather_facts: no
+  connection: local
+
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+    - name: Configurar interfaces de los spines con docker exec
+      shell: |
+        docker exec {{ ansible_docker_container }} vtysh \
+          -c "configure terminal" \
+          -c "interface {{ item.key }}" \
+          -c "ip address {{ item.value }}" \
+          -c "ip ospf area 0" \
+          -c "exit"
+      loop: "{{ interfaces | dict2items }}"
+      when: interfaces is defined
+
+    - name: Activar OSPF con docker exec
+      shell: |
+        docker exec {{ ansible_docker_container }} vtysh \
+          -c "configure terminal" \
+          -c "router ospf" \
+          -c "exit"
+
+    - name: Activar BGP básico con docker exec
+      shell: |
+        docker exec {{ ansible_docker_container }} vtysh \
+          -c "configure terminal" \
+          -c "router bgp 65100" \
+          -c "neighbor dc peer-group" \
+          -c "neighbor dc remote-as 65100" \
+          -c "neighbor dc update-source lo" \
+          -c "address-family l2vpn evpn" \
+          -c "neighbor dc route-reflector-client" \
+          -c "neighbor dc activate" \
+          -c "advertise-all-vni" \
+          -c "exit" \
+          -c "exit" \
+          -c "exit"
+
+    - name: Configurar vecinos DC con docker exec
+      shell: |
+        cmd="docker exec {{ ansible_docker_container }} vtysh -c 'configure terminal' -c 'router bgp 65100'"
+        {% for nb in neighbors %}
+        cmd+=" -c 'neighbor {{ nb }} peer-group dc'"
+        {% endfor %}
+        cmd+=" -c 'exit' -c 'exit'"
+        bash -c "$cmd"
+      when: neighbors is defined
+
+    - name: Guardar la configuración en el contenedor spine con docker exec
+      shell: |
+        docker exec {{ ansible_docker_container }} vtysh -c "copy running-config startup-config"
