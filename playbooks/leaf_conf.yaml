@@ -8,6 +8,9 @@
     ansible_python_interpreter: /usr/bin/python3
 
   tasks:
+    - name: Habilitar IP forwarding
+      shell: docker exec {{ ansible_docker_container }} sysctl -w net.ipv4.ip_forward=1
+
     - name: Configurar interfaces de los leafs con docker exec
       shell: |
         docker exec {{ ansible_docker_container }} vtysh \
@@ -24,6 +27,7 @@
         docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
           -c "router ospf" \
+          -c "redistribute connected" \
           -c "exit"
 
     - name: Configurar BGP spines en leafs con docker exec

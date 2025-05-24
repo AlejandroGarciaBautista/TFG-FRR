@@ -4,3 +4,14 @@
 4. Parar el contenedor
 5. docker commit <nombre del contenedor> frr
 Con esto tenemos la imagen correcta
+
+
+Lanzar ContainerLab:
+containerlab deploy -t topology.yml
+docker ps
+docker rm -f $(docker ps -aq)
+docker exec -it clab-frr-spine-leaf-hosts-ansible-ansible bash
+docker exec -it clab-frr-spine-leaf-hosts-ansible-h1 bash
+
+Hacer un build del dockerfile
+docker build -t ansible-station .
