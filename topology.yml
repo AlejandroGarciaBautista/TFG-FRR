@@ -84,8 +84,8 @@ topology:
       binds:
         - /var/run/docker.sock:/var/run/docker.sock
         - /proc:/host_proc:ro
-        - ./inventory:/home/ansible/inventory:ro
-        - ./playbooks:/home/ansible/playbooks:ro
+        - ./inventory:/ansible/inventory:ro
+        - ./playbooks:/ansible/playbooks:ro
       cmd: "sh -c 'tail -f /dev/null'"
 
   links:
