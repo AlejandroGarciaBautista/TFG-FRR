@@ -5,7 +5,7 @@
   connection: local
 
   vars:
-    ansible_python_interpreter: /usr/bin/python3
+    ansible_python_interpreter: /usr/bin/python3 # https://docs.ansible.com/ansible-core/2.18/reference_appendices/interpreter_discovery.html
 
   tasks:
     - name: Habilitar IP forwarding
@@ -88,6 +88,15 @@
         - eth5
         - eth6
         - eth7
+        - eth8
+        - eth9
+        - eth10
+        - eth11
+        - eth12
+        - eth13
+        - eth14
+        - eth15
+        - eth16
 
     - name: Configurar interfaz br0 para servidores en el leaf con docker exec
       shell: |

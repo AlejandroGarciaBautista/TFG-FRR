@@ -1,4 +1,4 @@
-name: frr-spine-leaf-hosts-ansible
+name: tfg-frr-ansible
 
 # 1) Sección mgmt a nivel raíz para personalizar la red de gestión
 mgmt:
@@ -9,52 +9,17 @@ mgmt:
 topology:
   nodes:
     # 2 spines
-    spine1:
-      kind: linux
-      image: frr
-      mgmt-ipv4: 172.20.20.3
-      cap-add: ["NET_ADMIN", "NET_RAW"]
-      # Arranca FRR y luego permanece vivo
-      cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'"
-    spine2:
-      kind: linux
-      image: frr
-      mgmt-ipv4: 172.20.20.2
-      cap-add: ["NET_ADMIN", "NET_RAW"]
-      # Arranca FRR y luego permanece vivo
-      cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'"
+    spine1: {kind: linux, image: frr, mgmt-ipv4: 172.20.20.3, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'"}
+    spine2: {kind: linux, image: frr, mgmt-ipv4: 172.20.20.2, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'"}
 
     # 4 leafs
-    leaf1:
-      kind: linux
-      image: frr 
-      mgmt-ipv4: 172.20.20.11
-      cap-add: ["NET_ADMIN", "NET_RAW"]
-      # Arranca FRR y luego permanece vivo
-      cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'"
-    leaf2:
-      kind: linux
-      image: frr 
-      mgmt-ipv4: 172.20.20.12
-      cap-add: ["NET_ADMIN", "NET_RAW"]
-      # Arranca FRR y luego permanece vivo
-      cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'"
-    leaf3:
-      kind: linux
-      image: frr 
-      mgmt-ipv4: 172.20.20.13
-      cap-add: ["NET_ADMIN", "NET_RAW"]
-      # Arranca FRR y luego permanece vivo
-      cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'"
-    leaf4:
-      kind: linux 
-      image: frr 
-      mgmt-ipv4: 172.20.20.14
-      cap-add: ["NET_ADMIN", "NET_RAW"]
-      # Arranca FRR y luego permanece vivo
-      cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'"
+    leaf1: {kind: linux, image: frr, mgmt-ipv4: 172.20.20.11, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'"}
+    leaf2: {kind: linux, image: frr, mgmt-ipv4: 172.20.20.12, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'"}
+    leaf3: {kind: linux, image: frr, mgmt-ipv4: 172.20.20.13, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'"}
+    leaf4: {kind: linux, image: frr, mgmt-ipv4: 172.20.20.14, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'"}
 
-    # 12 hosts (3 por leaf)
+    # 48 hosts (12 por leaf)
+    # Leaf 1
     h1:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.21, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
     h2:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.22, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
     h3:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.23, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
@@ -68,7 +33,49 @@ topology:
     h11: { kind: linux, image: frr, mgmt-ipv4: 172.20.20.31, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
     h12: { kind: linux, image: frr, mgmt-ipv4: 172.20.20.32, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
 
-    # Nodo Ansible, con claves SSH montadas en 'binds' (no 'volumes') :contentReference[oaicite:2]{index=2}
+    # Leaf 2
+    h13:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.33, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h14:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.34, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h15:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.35, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h16:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.36, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h17:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.37, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h18:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.38, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h19:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.39, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h20:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.40, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h21:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.41, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h22:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.42, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h23:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.43, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h24:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.44, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+
+    # Leaf 3
+    h25:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.45, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h26:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.46, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h27:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.47, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h28:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.48, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h29:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.49, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h30:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.50, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h31:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.51, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h32:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.52, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h33:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.53, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h34:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.54, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h35:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.55, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h36:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.56, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+
+    # Leaf 4
+    h37:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.57, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h38:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.58, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h39:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.59, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h40:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.60, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h41:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.61, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h42:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.62, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h43:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.63, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h44:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.64, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h45:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.65, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h46:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.66, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h47:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.67, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    h48:  { kind: linux, image: frr, mgmt-ipv4: 172.20.20.68, cap-add: ["NET_ADMIN", "NET_RAW"], cmd: "sh -c '/usr/lib/frr/frrinit.sh start && tail -f /dev/null'" }
+    
+    # Nodo Ansible
     ansible:
       kind: linux
       image: ansible-station
@@ -104,18 +111,58 @@ topology:
     - endpoints: ["spine2:eth8", "leaf4:eth4"]
 
     # Hosts → su leaf (1 enlace)
+    # Leaf 1
     - endpoints: ["h1:eth1",  "leaf1:eth5"]
     - endpoints: ["h2:eth1",  "leaf1:eth6"]
     - endpoints: ["h3:eth1",  "leaf1:eth7"]
+    - endpoints: ["h4:eth1",  "leaf1:eth8"]
+    - endpoints: ["h5:eth1",  "leaf1:eth9"]
+    - endpoints: ["h6:eth1",  "leaf1:eth10"]
+    - endpoints: ["h7:eth1",  "leaf1:eth11"]
+    - endpoints: ["h8:eth1",  "leaf1:eth12"]
+    - endpoints: ["h9:eth1",  "leaf1:eth13"]
+    - endpoints: ["h10:eth1", "leaf1:eth14"]
+    - endpoints: ["h11:eth1", "leaf1:eth15"]
+    - endpoints: ["h12:eth1", "leaf1:eth16"]
 
-    - endpoints: ["h4:eth1",  "leaf2:eth5"]
-    - endpoints: ["h5:eth1",  "leaf2:eth6"]
-    - endpoints: ["h6:eth1",  "leaf2:eth7"]
+    # Leaf 2
+    - endpoints: ["h13:eth1",  "leaf2:eth5"]
+    - endpoints: ["h14:eth1",  "leaf2:eth6"]
+    - endpoints: ["h15:eth1",  "leaf2:eth7"]
+    - endpoints: ["h16:eth1",  "leaf2:eth8"]
+    - endpoints: ["h17:eth1",  "leaf2:eth9"]
+    - endpoints: ["h18:eth1",  "leaf2:eth10"]
+    - endpoints: ["h19:eth1",  "leaf2:eth11"]
+    - endpoints: ["h20:eth1",  "leaf2:eth12"]
+    - endpoints: ["h21:eth1",  "leaf2:eth13"]
+    - endpoints: ["h22:eth1", "leaf2:eth14"]
+    - endpoints: ["h23:eth1", "leaf2:eth15"]
+    - endpoints: ["h24:eth1", "leaf2:eth16"]
 
-    - endpoints: ["h7:eth1",  "leaf3:eth5"]
-    - endpoints: ["h8:eth1",  "leaf3:eth6"]
-    - endpoints: ["h9:eth1",  "leaf3:eth7"]
+    # Leaf 3
+    - endpoints: ["h25:eth1",  "leaf3:eth5"]
+    - endpoints: ["h26:eth1",  "leaf3:eth6"]
+    - endpoints: ["h27:eth1",  "leaf3:eth7"]
+    - endpoints: ["h28:eth1",  "leaf3:eth8"]
+    - endpoints: ["h29:eth1",  "leaf3:eth9"]
+    - endpoints: ["h30:eth1",  "leaf3:eth10"]
+    - endpoints: ["h31:eth1",  "leaf3:eth11"]
+    - endpoints: ["h32:eth1",  "leaf3:eth12"]
+    - endpoints: ["h33:eth1",  "leaf3:eth13"]
+    - endpoints: ["h34:eth1", "leaf3:eth14"]
+    - endpoints: ["h35:eth1", "leaf3:eth15"]
+    - endpoints: ["h36:eth1", "leaf3:eth16"]
 
-    - endpoints: ["h10:eth1", "leaf4:eth5"]
-    - endpoints: ["h11:eth1", "leaf4:eth6"]
-    - endpoints: ["h12:eth1", "leaf4:eth7"]
+    # Leaf 4
+    - endpoints: ["h37:eth1",  "leaf4:eth5"]
+    - endpoints: ["h38:eth1",  "leaf4:eth6"]
+    - endpoints: ["h39:eth1",  "leaf4:eth7"]
+    - endpoints: ["h40:eth1",  "leaf4:eth8"]
+    - endpoints: ["h41:eth1",  "leaf4:eth9"]
+    - endpoints: ["h42:eth1",  "leaf4:eth10"]
+    - endpoints: ["h43:eth1",  "leaf4:eth11"]
+    - endpoints: ["h44:eth1",  "leaf4:eth12"]
+    - endpoints: ["h45:eth1",  "leaf4:eth13"]
+    - endpoints: ["h46:eth1", "leaf4:eth14"]
+    - endpoints: ["h47:eth1", "leaf4:eth15"]
+    - endpoints: ["h48:eth1", "leaf4:eth16"]
