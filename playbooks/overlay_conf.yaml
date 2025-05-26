@@ -1,30 +1,30 @@
- # playbooks/overlay_conf.yaml
- - name: Levantar VMs simuladas en VXLAN
-   hosts: servers
-   gather_facts: no
-   connection: local
+- name: Configurar las VMs
+  hosts: servers
+  gather_facts: no
+  connection: local
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
 
-   vars:
-     ansible_python_interpreter: /usr/bin/python3
-
-   tasks:
-    - name: Crear el bridge
-      raw: |
-          ip link add br0 type bridge
-          ip link set br0 up
-
+  tasks:
     - name: Crea una simulación de máquina virtual
-      raw: |
-          ip link add vxlan100 type vxlan id 100 local {{ server_net_ip }}
-          ip link set vxlan100 up
-          ip link set vxlan100 master br0
-          ip link add veth1 type veth peer name veth_vm
-          ip link set veth1 master br0
-          ip link set veth1 up
-          ip netns add vm1
-          ip link set veth_vm up
-          ip link set veth_vm netns vm1
-          ip netns exec vm1 ip addr add {{ item }} dev veth_vm
-          ip netns exec vm1 ip link set veth_vm up
-      with_items: "{{ ips_vm }}"
-      when: ips_vm is defined
+      shell: |
+        
+        docker exec {{ansible_docker_container}} ip link add br0 type bridge
+        docker exec {{ansible_docker_container}} ip link set br0 up        
+        
+        docker exec {{ansible_docker_container}} ip link add vxlan{{vxlan_id}} type vxlan id {{vxlan_id}} dev eth1 local {{ server_net_ip }}
+        docker exec {{ansible_docker_container}} ip link set vxlan{{vxlan_id}} master br0
+        docker exec {{ansible_docker_container}} ip link set vxlan{{vxlan_id}} up
+        
+        docker exec {{ansible_docker_container}} ip netns add {{ns_name}}
+        docker exec {{ansible_docker_container}} ip link add {{veth[0]}} type veth peer name {{veth[1]}}
+        docker exec {{ansible_docker_container}} ip link set {{veth[0]}} master br0
+        docker exec {{ansible_docker_container}} ip link set {{veth[0]}} up
+        docker exec {{ansible_docker_container}} ip link set {{veth[1]}} netns {{ns_name}}
+        docker exec {{ansible_docker_container}} ip netns exec {{ns_name}} ip link set lo up
+        docker exec {{ansible_docker_container}} ip netns exec {{ns_name}} ip link set {{veth[1]}} up
+        docker exec {{ansible_docker_container}} ip netns exec {{ns_name}} ip address add {{ns_ip}} dev {{veth[1]}}
+
+    - name: "Guardar la configuración"
+      shell: |
+        docker exec {{ ansible_docker_container }} vtysh -c "copy running-config startup-config"

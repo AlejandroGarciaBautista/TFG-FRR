@@ -7,6 +7,16 @@
     ansible_python_interpreter: /usr/bin/python3
 
   tasks:
+
+    - name: Eliminamos la interfaz de gestion de ContainerLabs
+      shell: |
+        docker exec {{ hostvars[inventory_hostname].ansible_docker_container }} vtysh \
+          -c "configure terminal" \
+          -c "interface eth0" \
+          -c "shutdown" \
+          -c "exit" \
+          -c "exit"
+
     - name: Configurar IP del servidor con docker exec
       shell: |
         docker exec {{ hostvars[inventory_hostname].ansible_docker_container }} vtysh \
@@ -38,15 +48,6 @@
         cmd+=" -c 'exit' -c 'exit' -c 'exit'"
         bash -c "$cmd"
       when: hostvars[inventory_hostname].leafs is defined
-
-    - name: Configurar IP del servidor con docker exec
-      shell: |
-        docker exec {{ hostvars[inventory_hostname].ansible_docker_container }} vtysh \
-          -c "configure terminal" \
-          -c "interface eth0" \
-          -c "shutdown" \
-          -c "exit" \
-          -c "exit"
 
     - name: Guardar configuración del servidor con docker exec
       shell: |

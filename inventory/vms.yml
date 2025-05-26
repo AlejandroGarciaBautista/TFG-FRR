@@ -1,0 +1,71 @@
+all:
+  vars:
+    ansible_user: root
+    ansible_connection: local
+    
+  hosts:
+    server1_vm1:
+        ansible_docker_container: clab-tfg-frr-ansible-h1
+        server_net_ip: 10.1.0.2
+        vxlan_id: 10
+        ns_name: c10-vm1
+        ns_ip: 192.168.10.2/24
+        veth: [veth1_host, veth1_vm]
+
+    server1_vm2:
+        ansible_docker_container: clab-tfg-frr-ansible-h1
+        server_net_ip: 10.1.0.2
+        vxlan_id: 10
+        ns_name: c10-vm2
+        ns_ip: 192.168.10.3/24
+        veth: [veth2_host, veth2_vm]
+   
+    server20_vm1:
+        ansible_docker_container: clab-tfg-frr-ansible-h20
+        server_net_ip: 10.2.0.9
+        vxlan_id: 10
+        ns_name: c10-vm3
+        ns_ip: 192.168.10.4/24
+        veth: [veth1_host, veth1_vm]
+
+    server20_vm2:
+        ansible_docker_container: clab-tfg-frr-ansible-h20
+        server_net_ip: 10.2.0.9
+        vxlan_id: 20
+        ns_name: c20-vm1
+        ns_ip: 192.168.20.2/24
+        veth: [veth2_host, veth2_vm]
+
+    server25_vm1:
+        ansible_docker_container: clab-tfg-frr-ansible-h25
+        server_net_ip: 10.3.0.2
+        vxlan_id: 10
+        ns_name: c10-vm4
+        ns_ip: 192.168.10.5/24
+        veth: [veth1_host, veth1_vm]
+
+    server25_vm2:
+        ansible_docker_container: clab-tfg-frr-ansible-h25
+        server_net_ip: 10.3.0.2
+        vxlan_id: 20
+        ns_name: c20-vm2
+        ns_ip: 192.168.20.3/24
+        veth: [veth2_host, veth2_vm]
+
+    server40_vm1:
+        ansible_docker_container: clab-tfg-frr-ansible-h40
+        server_net_ip: 10.4.0.3
+        vxlan_id: 30
+        ns_name: c30-vm1
+        ns_ip: 192.168.30.2/24
+        veth: [veth1_host, veth1_vm]
+
+servers:
+    hosts:
+        server1_vm1:
+        server1_vm2: 
+        server20_vm1:
+        server20_vm2:
+        server25_vm1:
+        server25_vm2:
+        server40_vm1: 
