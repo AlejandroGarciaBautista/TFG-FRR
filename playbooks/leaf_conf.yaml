@@ -38,6 +38,12 @@
           -c "neighbor spines peer-group" \
           -c "neighbor spines remote-as 65100" \
           -c "neighbor spines update-source lo" \
+          # # -c "address-family l2vpn evpn" \
+          # # -c "advertise-all-vni" \
+          # # -c "neighbor spines route-reflector-client" \
+          # # -c "neighbor spines activate" \
+          # # -c "exit-address-family" \
+          # # -c "exit" \
           -c "exit" \
           -c "exit"
 

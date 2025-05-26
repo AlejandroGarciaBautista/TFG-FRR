@@ -1,4 +1,4 @@
-1. Crear un contenedor docker con la imagen oficial de FRR
+1. Crear un contenedor docker con la imagen oficial de FRR --> docker run -d
 2. Modificar los daemons
 3. touch /etc/frr/vtysh.conf
 4. Parar el contenedor
