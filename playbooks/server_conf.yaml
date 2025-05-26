@@ -10,7 +10,7 @@
 
     - name: Eliminamos la interfaz de gestion de ContainerLabs
       shell: |
-        docker exec {{ hostvars[inventory_hostname].ansible_docker_container }} vtysh \
+        docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
           -c "interface eth0" \
           -c "shutdown" \
@@ -19,18 +19,18 @@
 
     - name: Configurar IP del servidor con docker exec
       shell: |
-        docker exec {{ hostvars[inventory_hostname].ansible_docker_container }} vtysh \
+        docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
           -c "interface eth1" \
-          -c "ip address {{ hostvars[inventory_hostname].server_net_ip }}/24" \
+          -c "ip address {{ server_net_ip }}/24" \
           -c "exit" \
-          -c "ip route 0.0.0.0/0 {{ hostvars[inventory_hostname].gateway }}" \
+          -c "ip route 0.0.0.0/0 {{ gateway }}" \
           -c "exit"
-      when: hostvars[inventory_hostname].server_net_ip is defined
+      when: server_net_ip is defined
 
     - name: Configurar BGP del servidor con docker exec
       shell: |
-        docker exec {{ hostvars[inventory_hostname].ansible_docker_container }} vtysh \
+        docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
           -c "router bgp 65100" \
           -c "neighbor leafs peer-group" \
@@ -38,17 +38,21 @@
           -c "exit" \
           -c "exit"
 
-    - name: Configurar vecinos leafs con docker exec
+    - name: Configurar vecinos leafs
       shell: |
-        cmd="docker exec {{ hostvars[inventory_hostname].ansible_docker_container }} vtysh -c 'configure terminal' -c 'router bgp 65100'"
-        {% for ip in hostvars[inventory_hostname].leafs %}
-        cmd+=" -c 'neighbor {{ ip }} peer-group leafs'"
-        {% endfor %}
-        cmd+=" -c 'address-family l2vpn evpn' -c 'neighbor leafs activate' -c 'advertise-all-vni'"
-        cmd+=" -c 'exit' -c 'exit' -c 'exit'"
-        bash -c "$cmd"
-      when: hostvars[inventory_hostname].leafs is defined
+        docker exec {{ ansible_docker_container }} vtysh\
+          -c "configure terminal" \
+          -c "router bgp 65100" \
+          -c "neighbor {{ item }} peer-group leafs" \
+          -c "address-family l2vpn evpn" \
+          -c "neighbor leafs activate" \
+          -c "advertise-all-vni" \
+          -c "exit" \
+          -c "exit" \
+          -c "exit"
+      with_items: "{{ leafs }}"
+      when: leafs is defined
 
     - name: Guardar configuración del servidor con docker exec
       shell: |
-        docker exec {{ hostvars[inventory_hostname].ansible_docker_container }} vtysh -c "copy running-config startup-config"
+        docker exec {{ ansible_docker_container }} vtysh -c "copy running-config startup-config"

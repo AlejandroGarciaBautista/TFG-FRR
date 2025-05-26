@@ -47,14 +47,15 @@
           -c "exit" \
           -c "exit"
 
-    - name: Configurar vecinos DC con docker exec
-      shell: |
-        cmd="docker exec {{ ansible_docker_container }} vtysh -c 'configure terminal' -c 'router bgp 65100'"
-        {% for nb in neighbors %}
-        cmd+=" -c 'neighbor {{ nb }} peer-group dc'"
-        {% endfor %}
-        cmd+=" -c 'exit' -c 'exit'"
-        bash -c "$cmd"
+    - name: Activar BGP
+      raw: |
+        docker exec {{ ansible_docker_container }} vtysh \
+          -c "configure terminal" \
+          -c "router bgp 65100" \
+          -c "neighbor {{ item }} peer-group dc" \
+          -c "exit" \
+          -c "exit"
+      with_items: "{{ neighbors }}"
       when: neighbors is defined
 
     - name: Guardar la configuración en el contenedor spine con docker exec

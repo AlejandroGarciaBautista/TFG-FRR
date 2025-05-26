@@ -43,12 +43,13 @@
 
     - name: Configurar vecinos spines con docker exec
       shell: |
-        cmd="docker exec {{ ansible_docker_container }} vtysh -c 'configure terminal' -c 'router bgp 65100'"
-        {% for sp in spines %}
-        cmd+=" -c 'neighbor {{ sp }} peer-group spines'"
-        {% endfor %}
-        cmd+=" -c 'exit' -c 'exit'"
-        bash -c "$cmd"
+        docker exec {{ ansible_docker_container }} vtysh \
+        -c "configure terminal" \
+        -c "router bgp 65100" \
+        -c "neighbor {{ item }} peer-group spines" \
+        -c "exit" \
+        -c "exit"
+      with_items: "{{ spines }}"
       when: spines is defined
 
     - name: Configurar BGP servidores en leafs con docker exec
@@ -67,19 +68,21 @@
           -c "exit" \
           -c "exit"
 
-    - name: Configurar vecinos servidores con docker exec
+    - name: Configurar vecinos servidores 
       shell: |
-        cmd="docker exec {{ ansible_docker_container }} vtysh -c 'configure terminal' -c 'router bgp 65100'"
-        {% for srv in servers %}
-        cmd+=" -c 'neighbor {{ srv }} peer-group servers'"
-        {% endfor %}
-        cmd+=" -c 'exit' -c 'exit'"
-        bash -c "$cmd"
-      when: servers is defined
+        docker exec {{ ansible_docker_container }} vtysh \        
+          -c "configure terminal" \
+          -c "router bgp 65100" \
+          -c "neighbor {{ item }} peer-group servers" \
+          -c "exit" \
+          -c "exit"
+      with_items: "{{ servers }}"
+      when: servers is defined 
 
     - name: Crear el bridge br0 dentro de contenedor leaf con docker exec
       shell: |
-        docker exec {{ ansible_docker_container }} bash -c "ip link show br0 || (ip link add br0 type bridge && ip link set br0 up)"
+        docker exec {{ ansible_docker_container }} ip link add br0 type bridge
+        docker exec {{ ansible_docker_container }} ip link set br0 up
 
     - name: Añadir puertos al bridge en contenedor leaf con docker exec
       shell: |
