@@ -46,7 +46,7 @@ all:
 
     server25_vm2:
         ansible_docker_container: clab-tfg-frr-ansible-h25
-        server_net_ip: 10.3.0.2
+        server_net_ip: 10.3.0.5
         vxlan_id: 20
         ns_name: c20-vm2
         ns_ip: 192.168.20.3/24
