@@ -38,13 +38,11 @@
           -c "neighbor spines peer-group" \
           -c "neighbor spines remote-as 65100" \
           -c "neighbor spines update-source lo" \
-          # # -c "address-family l2vpn evpn" \
-          # # -c "advertise-all-vni" \
-          # # -c "neighbor spines route-reflector-client" \
-          # # -c "neighbor spines activate" \
-          # # -c "exit-address-family" \
-          # # -c "exit" \
-          -c "exit" \
+          -c "address-family l2vpn evpn" \
+          -c "neighbor spines route-reflector-client" \
+          -c "neighbor spines activate" \
+          -c "advertise-all-vni" \
+          -c "exit-address-family" \
           -c "exit"
 
     - name: Configurar vecinos spines con docker exec
@@ -57,33 +55,6 @@
         -c "exit"
       with_items: "{{ spines }}"
       when: spines is defined
-
-    - name: Configurar BGP servidores en leafs con docker exec
-      shell: |
-        docker exec {{ ansible_docker_container }} vtysh \
-          -c "configure terminal" \
-          -c "router bgp 65100" \
-          -c "neighbor servers peer-group" \
-          -c "neighbor servers remote-as 65100" \
-          -c "neighbor servers update-source lo" \
-          -c "address-family l2vpn evpn" \
-          -c "neighbor servers route-reflector-client" \
-          -c "neighbor servers activate" \
-          -c "advertise-all-vni" \
-          -c "exit" \
-          -c "exit" \
-          -c "exit"
-
-    - name: Configurar vecinos servidores 
-      shell: |
-        docker exec {{ ansible_docker_container }} vtysh \        
-          -c "configure terminal" \
-          -c "router bgp 65100" \
-          -c "neighbor {{ item }} peer-group servers" \
-          -c "exit" \
-          -c "exit"
-      with_items: "{{ servers }}"
-      when: servers is defined 
 
     - name: Crear el bridge br0 dentro de contenedor leaf con docker exec
       shell: |

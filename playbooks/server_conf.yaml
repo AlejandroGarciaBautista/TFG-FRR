@@ -33,25 +33,24 @@
         docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
           -c "router bgp 65100" \
-          -c "neighbor leafs peer-group" \
-          -c "neighbor leafs remote-as 65100" \
-          -c "exit" \
+          -c "neighbor dc peer-group" \
+          -c "neighbor dc remote-as 65100" \
+          -c "neighbor dc update-source eth1" \
+          -c "address-family l2vpn evpn" \
+          -c "neighbor dc activate" \
+          -c "advertise-all-vni" \
+          -c "exit-address-family" \
           -c "exit"
 
-    - name: Configurar vecinos leafs
+    - name: Configurar vecinos EVPN en el servidor
       shell: |
-        docker exec {{ ansible_docker_container }} vtysh\
+        docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
           -c "router bgp 65100" \
-          -c "neighbor {{ item }} peer-group leafs" \
-          -c "address-family l2vpn evpn" \
-          -c "neighbor leafs activate" \
-          -c "advertise-all-vni" \
-          -c "exit" \
+          -c "neighbor 1.0.0.1 peer-group dc" \
+          -c "neighbor 1.0.0.2 peer-group dc" \
           -c "exit" \
           -c "exit"
-      with_items: "{{ leafs }}"
-      when: leafs is defined
 
     - name: Guardar configuración del servidor con docker exec
       shell: |
