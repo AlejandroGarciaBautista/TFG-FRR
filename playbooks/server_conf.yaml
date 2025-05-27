@@ -17,7 +17,7 @@
           -c "exit" \
           -c "exit"
 
-    - name: Configurar IP del servidor con docker exec
+    - name: Configurar IP del servidor
       shell: |
         docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
@@ -28,7 +28,7 @@
           -c "exit"
       when: server_net_ip is defined
 
-    - name: Configurar BGP del servidor con docker exec
+    - name: Configurar BGP del servidor
       shell: |
         docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
@@ -52,6 +52,6 @@
           -c "exit" \
           -c "exit"
 
-    - name: Guardar configuración del servidor con docker exec
+    - name: Guardar configuración del servidor
       shell: |
         docker exec {{ ansible_docker_container }} vtysh -c "copy running-config startup-config"

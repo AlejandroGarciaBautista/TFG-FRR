@@ -11,7 +11,7 @@
     - name: Habilitar IP forwarding
       shell: docker exec {{ ansible_docker_container }} sysctl -w net.ipv4.ip_forward=1
 
-    - name: Configurar interfaces de los spines con docker exec
+    - name: Configurar interfaces de los spines
       shell: |
         docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
@@ -22,7 +22,7 @@
       loop: "{{ interfaces | dict2items }}"
       when: interfaces is defined
 
-    - name: Activar OSPF con docker exec
+    - name: Activar OSPF
       shell: |
         docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
@@ -31,7 +31,7 @@
           -c "exit" \
           -c "exit"
 
-    - name: Activar BGP básico con docker exec
+    - name: Activar BGP básico
       shell: |
         docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
@@ -62,6 +62,6 @@
       with_items: "{{ neighbors }}"
       when: neighbors is defined
 
-    - name: Guardar la configuración en el contenedor spine con docker exec
+    - name: Guardar la configuración en el contenedor spine
       shell: |
         docker exec {{ ansible_docker_container }} vtysh -c "copy running-config startup-config"

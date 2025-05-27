@@ -11,7 +11,7 @@
     - name: Habilitar IP forwarding
       shell: docker exec {{ ansible_docker_container }} sysctl -w net.ipv4.ip_forward=1
 
-    - name: Configurar interfaces de los leafs con docker exec
+    - name: Configurar interfaces de los leafs
       shell: |
         docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
@@ -22,7 +22,7 @@
       loop: "{{ interfaces | dict2items }}"
       when: interfaces is defined
 
-    - name: Activar OSPF con docker exec
+    - name: Activar OSPF
       shell: |
         docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
@@ -30,7 +30,7 @@
           -c "redistribute connected" \
           -c "exit"
 
-    - name: Configurar BGP spines en leafs con docker exec
+    - name: Configurar BGP spines en leafs
       shell: |
         docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
@@ -45,7 +45,7 @@
           -c "exit-address-family" \
           -c "exit"
 
-    - name: Configurar vecinos spines con docker exec
+    - name: Configurar vecinos spines
       shell: |
         docker exec {{ ansible_docker_container }} vtysh \
         -c "configure terminal" \
@@ -56,12 +56,12 @@
       with_items: "{{ spines }}"
       when: spines is defined
 
-    - name: Crear el bridge br0 dentro de contenedor leaf con docker exec
+    - name: Crear el bridge br0 dentro de contenedor leaf
       shell: |
         docker exec {{ ansible_docker_container }} ip link add br0 type bridge
         docker exec {{ ansible_docker_container }} ip link set br0 up
 
-    - name: Añadir puertos al bridge en contenedor leaf con docker exec
+    - name: Añadir puertos al bridge en contenedor leaf
       shell: |
         docker exec {{ ansible_docker_container }} bash -c "ip link set {{ item }} master br0 && ip link set {{ item }} up"
       loop:
@@ -78,7 +78,7 @@
         - eth15
         - eth16
 
-    - name: Configurar interfaz br0 para servidores en el leaf con docker exec
+    - name: Configurar interfaz br0 para servidores en el leaf
       shell: |
         docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
@@ -89,6 +89,6 @@
           -c "exit"
       when: server_net_ip is defined
 
-    - name: Guardar la configuración en el contenedor leaf con docker exec
+    - name: Guardar la configuración en el contenedor leaf
       shell: |
         docker exec {{ ansible_docker_container }} vtysh -c "copy running-config startup-config"
