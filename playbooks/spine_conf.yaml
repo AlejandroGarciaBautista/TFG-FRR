@@ -31,7 +31,7 @@
           -c "exit" \
           -c "exit"
 
-    - name: Activar BGP básico
+    - name: Activar BGP
       shell: |
         docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
@@ -43,10 +43,6 @@
           -c "neighbor dc route-reflector-client" \
           -c "neighbor dc activate" \
           -c "advertise-all-vni" \
-          -c "neighbor 10.1.0.2 peer-group dc" \
-          -c "neighbor 10.2.0.9 peer-group dc" \
-          -c "neighbor 10.3.0.2 peer-group dc" \
-          -c "neighbor 10.4.0.3 peer-group dc" \
           -c "exit" \
           -c "exit" \
           -c "exit"

@@ -11,7 +11,7 @@
     - name: Habilitar IP forwarding
       shell: docker exec {{ ansible_docker_container }} sysctl -w net.ipv4.ip_forward=1
 
-    - name: Configurar interfaces de los leafs
+    - name: Cargar la configuración de las interfaces del nodo
       shell: |
         docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
@@ -30,7 +30,7 @@
           -c "redistribute connected" \
           -c "exit"
 
-    - name: Configurar BGP spines en leafs
+    - name: Configurar spines
       shell: |
         docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
@@ -39,10 +39,9 @@
           -c "neighbor spines remote-as 65100" \
           -c "neighbor spines update-source lo" \
           -c "address-family l2vpn evpn" \
-          -c "neighbor spines route-reflector-client" \
           -c "neighbor spines activate" \
-          -c "advertise-all-vni" \
           -c "exit-address-family" \
+          -c "exit" \
           -c "exit"
 
     - name: Configurar vecinos spines
@@ -55,6 +54,33 @@
         -c "exit"
       with_items: "{{ spines }}"
       when: spines is defined
+
+    - name: Configurar servidores
+      shell: |
+        docker exec {{ ansible_docker_container}} vtysh \
+        -c "configure terminal" \
+        -c "router bgp 65100" \
+        -c "neighbor servers peer-group" \
+        -c "neighbor servers remote-as 65100" \
+        -c "neighbor servers update-source lo" \
+        -c "address-family l2vpn evpn" \
+        -c "neighbor servers route-reflector-client" \
+        -c "neighbor servers activate" \
+        -c "advertise-all-vni" \
+        -c "exit" \
+        -c "exit" \
+        -c "exit"   
+
+    - name: Configurar vecinos servidores 
+      shell: |
+        docker exec {{ ansible_docker_container }} vtysh \
+        -c "configure terminal" \
+        -c "router bgp 65100" \
+        -c "neighbor {{ item }} peer-group servers" \
+        -c "exit" \
+        -c "exit"
+      with_items: "{{ servers }}"
+      when: servers is defined  
 
     - name: Crear el bridge br0 dentro de contenedor leaf
       shell: |
