@@ -1,0 +1,112 @@
+- name: Configurar las VMs
+  hosts: servers
+  gather_facts: no
+  connection: local
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+    # ▼ 1. Mueve aquí –o a group_vars– las variables globales
+    l2vnis:
+      - { id: 10, gw: 192.168.10.1/24 }
+      - { id: 30, gw: 192.168.30.1/24 }
+    l3vni: 1030
+    vrf_name: tenant1030
+    rt_table: 1030
+    vtep_lo: "{{ server_net_ip }}"
+
+  tasks:
+    - name: Habilitar IP forwarding
+      shell: docker exec {{ ansible_docker_container }} sysctl -w net.ipv4.ip_forward=1
+    
+    # ▼ 2. NUEVO bloque: prepara loopback, VRF, L3-VNI y bridges L2
+    - name: "Preparar dataplane EVPN/IRB (una vez por host)"
+      block:
+        - name: Loopback VTEP
+          shell: |
+            docker exec {{ ansible_docker_container }} ip addr add {{ vtep_lo }}/32 dev lo || true
+            docker exec {{ ansible_docker_container }} ip link set lo up
+
+        - name: VRF + tabla
+          shell: |
+            docker exec {{ ansible_docker_container }} ip link add {{ vrf_name }} type vrf table {{ rt_table }} || true
+            docker exec {{ ansible_docker_container }} ip link set {{ vrf_name }} up
+            docker exec {{ ansible_docker_container }} ip rule add oif {{ vrf_name }} table {{ rt_table }} || true
+            docker exec {{ ansible_docker_container }} ip route add table {{ rt_table }} unreachable default metric 4278198272 || true
+
+        - name: L3-VNI (sin IP)
+          shell: |
+            docker exec {{ ansible_docker_container }} ip link add vni{{ l3vni }} type vxlan id {{ l3vni }} local {{ vtep_lo }} dstport 4789 nolearning || true
+            docker exec {{ ansible_docker_container }} ip link add br{{ l3vni }} type bridge || true
+            docker exec {{ ansible_docker_container }} ip link set vni{{ l3vni }} master br{{ l3vni }}
+            docker exec {{ ansible_docker_container }} ip link set br{{ l3vni }} master {{ vrf_name }} addrgenmode none
+            docker exec {{ ansible_docker_container }} ip link set vni{{ l3vni }} type bridge_slave neigh_suppress on learning off
+            docker exec {{ ansible_docker_container }} ip link set vni{{ l3vni }} up
+            docker exec {{ ansible_docker_container }} ip link set br{{ l3vni }} up
+
+        - name: L2-VNIs + SVI
+          loop: "{{ l2vnis }}"
+          loop_control: { loop_var: l2 }
+          shell: |
+            docker exec {{ ansible_docker_container }} ip link add br{{ l2.id }} type bridge || true
+            docker exec {{ ansible_docker_container }} ip link set br{{ l2.id }} master {{ vrf_name }}
+            docker exec {{ ansible_docker_container }} ip addr add {{ l2.gw }} dev br{{ l2.id }} || true
+            docker exec {{ ansible_docker_container }} ip link add vni{{ l2.id }} type vxlan id {{ l2.id }} local {{ vtep_lo }} dstport 4789 nolearning || true
+            docker exec {{ ansible_docker_container }} ip link set vni{{ l2.id }} master br{{ l2.id }}
+            docker exec {{ ansible_docker_container }} ip link set vni{{ l2.id }} type bridge_slave neigh_suppress on learning off
+            docker exec {{ ansible_docker_container }} ip link set vni{{ l2.id }} up
+            docker exec {{ ansible_docker_container }} ip link set br{{ l2.id }} up
+      run_once: false   # se ejecuta por cada host
+
+    # ▼ 3. MODIFICA tu task existente: usa br{{ vxlan_id }} en lugar de br0
+    - name: Crea una simulación de máquina virtual
+      shell: |
+        docker exec {{ansible_docker_container}} ip link add vxlan{{vxlan_id}} type vxlan id {{vxlan_id}} dev eth1 local {{ server_net_ip }}
+        docker exec {{ansible_docker_container}} ip link set vxlan{{vxlan_id}} master br{{ vxlan_id }}
+        docker exec {{ansible_docker_container}} ip link set vxlan{{vxlan_id}} up
+
+        docker exec {{ansible_docker_container}} ip netns add {{ns_name}}
+        docker exec {{ansible_docker_container}} ip link add {{veth[0]}} type veth peer name {{veth[1]}}
+        docker exec {{ansible_docker_container}} ip link set {{veth[0]}} master br{{ vxlan_id }}
+        docker exec {{ansible_docker_container}} ip link set {{veth[0]}} up
+        docker exec {{ansible_docker_container}} ip link set {{veth[1]}} netns {{ns_name}}
+        docker exec {{ansible_docker_container}} ip netns exec {{ns_name}} ip link set lo up
+        docker exec {{ansible_docker_container}} ip netns exec {{ns_name}} ip link set {{veth[1]}} up
+        docker exec {{ansible_docker_container}} ip netns exec {{ns_name}} ip address add {{ns_ip}} dev {{veth[1]}}
+
+    - name: Configurar Cross-VXLAN en VTYSH
+      shell: |
+        docker exec {{ ansible_docker_container }} vtysh \
+          -c "configure terminal" \
+            ### 3.1 VRF + L3-VNI
+            -c "vrf {{ vrf_name }}" \
+            -c " vni {{ l3vni }}" \
+            -c "exit-vrf" \
+            ### 3.2 BGP global
+            -c "router bgp 65100" \
+            -c " bgp router-id {{ server_net_ip }}" \
+            -c " neighbor leafs peer-group" \
+            -c " neighbor leafs remote-as 65100" \
+            -c " address-family ipv4 unicast" \
+            -c "  network {{ vtep_lo }}/32" \
+            -c " exit-address-family" \
+            -c " address-family l2vpn evpn" \
+            -c "  neighbor leafs activate" \
+            -c "  advertise-all-vni" \
+            -c "  advertise-svi-ip" \
+            -c " exit-address-family" \
+            -c "exit" \
+            ### 3.3 BGP dentro de la VRF
+            -c "router bgp 65100 vrf {{ vrf_name }}" \
+            -c " address-family ipv4 unicast" \
+            -c "  redistribute connected" \
+            -c " exit-address-family" \
+            -c " address-family l2vpn evpn" \
+            -c "  advertise ipv4 unicast" \
+            -c " exit-address-family" \
+            -c "exit" \
+          -c "end" \
+          -c "write memory"
+      run_once: false 
+
+    - name: Guardar la configuración
+      shell: docker exec {{ ansible_docker_container }} vtysh -c "copy running-config startup-config"

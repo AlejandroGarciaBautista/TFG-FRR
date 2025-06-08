@@ -1,0 +1,70 @@
+En h1:
+
+! ---------- 3.1 VRF + L3-VNI ----------
+vrf tenant1030
+ vni 1030
+exit-vrf
+
+! ---------- 3.2 BGP global ----------
+router bgp 65100
+ bgp router-id 10.1.0.2
+ neighbor leafs peer-group
+ neighbor leafs remote-as 65100
+
+ address-family ipv4 unicast
+  network 10.1.0.2/32          ! anuncia tu VTEP-IP
+ exit-address-family
+
+ address-family l2vpn evpn
+  neighbor leafs activate
+  advertise-all-vni
+  advertise-svi-ip
+ exit-address-family
+exit
+
+! ---------- 3.3 BGP dentro de la VRF ----------
+router bgp 65100 vrf tenant1030
+ address-family ipv4 unicast
+  redistribute connected       ! exporta las SVIs 192.168.10.1 y 192.168.30.1
+ exit-address-family
+
+ address-family l2vpn evpn
+  advertise ipv4 unicast       ! publica esos prefijos como type-5
+ exit-address-family
+exit
+
+
+En h40:
+
+! ---------- 3.1 VRF + L3-VNI ----------
+vrf tenant1030
+ vni 1030
+exit-vrf
+
+! ---------- 3.2 BGP global ----------
+router bgp 65100
+ bgp router-id 10.4.0.5
+ neighbor leafs peer-group
+ neighbor leafs remote-as 65100
+
+ address-family ipv4 unicast
+  network 10.4.0.5/32          ! tu VTEP-IP
+ exit-address-family
+
+ address-family l2vpn evpn
+  neighbor leafs activate
+  advertise-all-vni
+  advertise-svi-ip
+ exit-address-family
+exit
+
+! ---------- 3.3 BGP dentro de la VRF ----------
+router bgp 65100 vrf tenant1030
+ address-family ipv4 unicast
+  redistribute connected       ! exporta las SVIs 192.168.10.1 y 192.168.30.1
+ exit-address-family
+
+ address-family l2vpn evpn
+  advertise ipv4 unicast
+ exit-address-family
+exit
