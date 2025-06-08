@@ -60,10 +60,6 @@
     # ▼ 3. MODIFICA tu task existente: usa br{{ vxlan_id }} en lugar de br0
     - name: Crea una simulación de máquina virtual
       shell: |
-        docker exec {{ansible_docker_container}} ip link add vxlan{{vxlan_id}} type vxlan id {{vxlan_id}} dev eth1 local {{ server_net_ip }}
-        docker exec {{ansible_docker_container}} ip link set vxlan{{vxlan_id}} master br{{ vxlan_id }}
-        docker exec {{ansible_docker_container}} ip link set vxlan{{vxlan_id}} up
-
         docker exec {{ansible_docker_container}} ip netns add {{ns_name}}
         docker exec {{ansible_docker_container}} ip link add {{veth[0]}} type veth peer name {{veth[1]}}
         docker exec {{ansible_docker_container}} ip link set {{veth[0]}} master br{{ vxlan_id }}
@@ -72,41 +68,36 @@
         docker exec {{ansible_docker_container}} ip netns exec {{ns_name}} ip link set lo up
         docker exec {{ansible_docker_container}} ip netns exec {{ns_name}} ip link set {{veth[1]}} up
         docker exec {{ansible_docker_container}} ip netns exec {{ns_name}} ip address add {{ns_ip}} dev {{veth[1]}}
+        docker exec {{ansible_docker_container}} ip netns exec {{ns_name}} ip route add {{dst_network}} via {{ns_gw}} dev {{veth[1]}}
 
     - name: Configurar Cross-VXLAN en VTYSH
       shell: |
         docker exec {{ ansible_docker_container }} vtysh \
           -c "configure terminal" \
-            ### 3.1 VRF + L3-VNI
-            -c "vrf {{ vrf_name }}" \
-            -c " vni {{ l3vni }}" \
-            -c "exit-vrf" \
-            ### 3.2 BGP global
-            -c "router bgp 65100" \
-            -c " bgp router-id {{ server_net_ip }}" \
-            -c " neighbor leafs peer-group" \
-            -c " neighbor leafs remote-as 65100" \
-            -c " address-family ipv4 unicast" \
-            -c "  network {{ vtep_lo }}/32" \
-            -c " exit-address-family" \
-            -c " address-family l2vpn evpn" \
-            -c "  neighbor leafs activate" \
-            -c "  advertise-all-vni" \
-            -c "  advertise-svi-ip" \
-            -c " exit-address-family" \
-            -c "exit" \
-            ### 3.3 BGP dentro de la VRF
-            -c "router bgp 65100 vrf {{ vrf_name }}" \
-            -c " address-family ipv4 unicast" \
-            -c "  redistribute connected" \
-            -c " exit-address-family" \
-            -c " address-family l2vpn evpn" \
-            -c "  advertise ipv4 unicast" \
-            -c " exit-address-family" \
-            -c "exit" \
-          -c "end" \
-          -c "write memory"
-      run_once: false 
+          -c "vrf {{ vrf_name }}" \
+          -c "vni {{ l3vni }}" \
+          -c "exit-vrf" \
+          -c "router bgp 65100" \
+          -c "bgp router-id {{ server_net_ip }}" \
+          -c "neighbor leafs peer-group" \
+          -c "neighbor leafs remote-as 65100" \
+          -c "address-family ipv4 unicast" \
+          -c "network {{ vtep_lo }}/32" \
+          -c "exit-address-family" \
+          -c "address-family l2vpn evpn" \
+          -c "neighbor leafs activate" \
+          -c "advertise-all-vni" \
+          -c "advertise-svi-ip" \
+          -c "exit-address-family" \
+          -c "exit" \
+          -c "router bgp 65100 vrf {{ vrf_name }}" \
+          -c "address-family ipv4 unicast" \
+          -c "redistribute connected" \
+          -c "exit-address-family" \
+          -c "address-family l2vpn evpn" \
+          -c "advertise ipv4 unicast" \
+          -c "exit-address-family" \
+          -c "exit"
 
     - name: Guardar la configuración
       shell: docker exec {{ ansible_docker_container }} vtysh -c "copy running-config startup-config"

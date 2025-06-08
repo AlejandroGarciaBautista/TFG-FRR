@@ -10,8 +10,6 @@ all:
         vxlan_id: 10
         ns_name: c10-vm1
         ns_ip: 192.168.10.2/24
-        dst_network: 192.168.30.0/24
-        ns_gw: 192.168.10.1
         veth: [veth1_host, veth1_vm]
 
     server1_vm2:
@@ -20,9 +18,15 @@ all:
         vxlan_id: 10
         ns_name: c10-vm2
         ns_ip: 192.168.10.3/24
-        dst_network: 192.168.30.0/24
-        ns_gw: 192.168.10.1
         veth: [veth2_host, veth2_vm]
+
+    server20_vm1:
+        ansible_docker_container: clab-tfg-frr-ansible-h20
+        server_net_ip: 10.2.0.9
+        vxlan_id: 10
+        ns_name: c10-vm3
+        ns_ip: 192.168.10.4/24
+        veth: [veth1_host, veth1_vm]
 
     server25_vm1:
         ansible_docker_container: clab-tfg-frr-ansible-h25
@@ -30,8 +34,6 @@ all:
         vxlan_id: 10
         ns_name: c10-vm4
         ns_ip: 192.168.10.5/24
-        dst_network: 192.168.30.0/24
-        ns_gw: 192.168.10.1
         veth: [veth1_host, veth1_vm]
 
     server40_vm1:
@@ -40,13 +42,12 @@ all:
         vxlan_id: 30
         ns_name: c30-vm1
         ns_ip: 192.168.30.2/24
-        dst_network: 192.168.10.0/24
-        ns_gw: 192.168.30.1
         veth: [veth1_host, veth1_vm]
 
 servers:
     hosts:
         server1_vm1:
         server1_vm2:
+        server20_vm1:
         server25_vm1:
         server40_vm1: 
