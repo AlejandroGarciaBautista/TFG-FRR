@@ -12,9 +12,9 @@
         docker exec {{ansible_docker_container}} ip link add br0 type bridge
         docker exec {{ansible_docker_container}} ip link set br0 up        
         
-        docker exec {{ansible_docker_container}} ip link add vxlan{{vxlan_id}} type vxlan id {{vxlan_id}} dev eth1 local {{ server_net_ip }}
-        docker exec {{ansible_docker_container}} ip link set vxlan{{vxlan_id}} master br0
-        docker exec {{ansible_docker_container}} ip link set vxlan{{vxlan_id}} up
+        docker exec {{ansible_docker_container}} ip link add vni{{vxlan_id}} type vxlan id {{vxlan_id}} dev eth1 local {{ server_net_ip }}
+        docker exec {{ansible_docker_container}} ip link set vni{{vxlan_id}} master br0
+        docker exec {{ansible_docker_container}} ip link set vni{{vxlan_id}} up
         
         docker exec {{ansible_docker_container}} ip netns add {{ns_name}}
         docker exec {{ansible_docker_container}} ip link add {{veth[0]}} type veth peer name {{veth[1]}}

@@ -5,10 +5,6 @@
   vars:
     ansible_python_interpreter: /usr/bin/python3
 
-    # ▼ 1. Mueve aquí –o a group_vars– las variables globales
-    l2vnis:
-      - { id: 10, gw: 192.168.10.1/24 }
-      - { id: 30, gw: 192.168.30.1/24 }
     l3vni: 1030
     vrf_name: tenant1030
     rt_table: 1030
@@ -30,8 +26,6 @@
           shell: |
             docker exec {{ ansible_docker_container }} ip link add {{ vrf_name }} type vrf table {{ rt_table }} || true
             docker exec {{ ansible_docker_container }} ip link set {{ vrf_name }} up
-            docker exec {{ ansible_docker_container }} ip rule add oif {{ vrf_name }} table {{ rt_table }} || true
-            docker exec {{ ansible_docker_container }} ip route add table {{ rt_table }} unreachable default metric 4278198272 || true
 
         - name: L3-VNI (sin IP)
           shell: |
@@ -44,17 +38,15 @@
             docker exec {{ ansible_docker_container }} ip link set br{{ l3vni }} up
 
         - name: L2-VNIs + SVI
-          loop: "{{ l2vnis }}"
-          loop_control: { loop_var: l2 }
           shell: |
-            docker exec {{ ansible_docker_container }} ip link add br{{ l2.id }} type bridge || true
-            docker exec {{ ansible_docker_container }} ip link set br{{ l2.id }} master {{ vrf_name }}
-            docker exec {{ ansible_docker_container }} ip addr add {{ l2.gw }} dev br{{ l2.id }} || true
-            docker exec {{ ansible_docker_container }} ip link add vni{{ l2.id }} type vxlan id {{ l2.id }} local {{ vtep_lo }} dstport 4789 nolearning || true
-            docker exec {{ ansible_docker_container }} ip link set vni{{ l2.id }} master br{{ l2.id }}
-            docker exec {{ ansible_docker_container }} ip link set vni{{ l2.id }} type bridge_slave neigh_suppress on learning off
-            docker exec {{ ansible_docker_container }} ip link set vni{{ l2.id }} up
-            docker exec {{ ansible_docker_container }} ip link set br{{ l2.id }} up
+            docker exec {{ ansible_docker_container }} ip link add br{{ vxlan_id }} type bridge || true
+            docker exec {{ ansible_docker_container }} ip link set br{{ vxlan_id }} master {{ vrf_name }}
+            docker exec {{ ansible_docker_container }} ip addr add {{ ns_gw }}/24 dev br{{ vxlan_id }} || true
+            docker exec {{ ansible_docker_container }} ip link add vni{{ vxlan_id }} type vxlan id {{ vxlan_id }} local {{ vtep_lo }} dstport 4789 nolearning || true
+            docker exec {{ ansible_docker_container }} ip link set vni{{ vxlan_id }} master br{{ vxlan_id }}
+            docker exec {{ ansible_docker_container }} ip link set vni{{ vxlan_id }} type bridge_slave neigh_suppress on learning off
+            docker exec {{ ansible_docker_container }} ip link set vni{{ vxlan_id }} up
+            docker exec {{ ansible_docker_container }} ip link set br{{ vxlan_id }} up
       run_once: false   # se ejecuta por cada host
 
     # ▼ 3. MODIFICA tu task existente: usa br{{ vxlan_id }} en lugar de br0
