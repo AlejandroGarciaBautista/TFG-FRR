@@ -24,6 +24,16 @@ all:
         ns_gw: 192.168.10.1
         veth: [veth2_host, veth2_vm]
 
+    server20_vm1:
+        ansible_docker_container: clab-tfg-frr-ansible-h20
+        server_net_ip: 10.2.0.2
+        vxlan_id: 10
+        ns_name: c10-vm3
+        ns_ip: 192.168.10.4/24
+        dst_network: 192.168.30.0/24
+        ns_gw: 192.168.10.1
+        veth: [veth1_host, veth1_vm]
+
     server25_vm1:
         ansible_docker_container: clab-tfg-frr-ansible-h25
         server_net_ip: 10.3.0.2
@@ -48,5 +58,6 @@ servers:
     hosts:
         server1_vm1:
         server1_vm2:
+        server20_vm1:
         server25_vm1:
         server40_vm1: 
