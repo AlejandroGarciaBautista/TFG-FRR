@@ -1,0 +1,25 @@
+PING 192.168.10.3 (192.168.10.3): 56 data bytes
+64 bytes from 192.168.10.3: seq=0 ttl=64 time=0.042 ms
+64 bytes from 192.168.10.3: seq=1 ttl=64 time=0.040 ms
+64 bytes from 192.168.10.3: seq=2 ttl=64 time=0.115 ms
+64 bytes from 192.168.10.3: seq=3 ttl=64 time=0.422 ms
+64 bytes from 192.168.10.3: seq=4 ttl=64 time=0.124 ms
+64 bytes from 192.168.10.3: seq=5 ttl=64 time=0.108 ms
+64 bytes from 192.168.10.3: seq=6 ttl=64 time=0.357 ms
+64 bytes from 192.168.10.3: seq=7 ttl=64 time=0.120 ms
+64 bytes from 192.168.10.3: seq=8 ttl=64 time=0.581 ms
+64 bytes from 192.168.10.3: seq=9 ttl=64 time=0.085 ms
+64 bytes from 192.168.10.3: seq=10 ttl=64 time=0.224 ms
+64 bytes from 192.168.10.3: seq=11 ttl=64 time=0.129 ms
+64 bytes from 192.168.10.3: seq=12 ttl=64 time=0.130 ms
+64 bytes from 192.168.10.3: seq=13 ttl=64 time=0.142 ms
+64 bytes from 192.168.10.3: seq=14 ttl=64 time=0.308 ms
+64 bytes from 192.168.10.3: seq=15 ttl=64 time=0.142 ms
+64 bytes from 192.168.10.3: seq=16 ttl=64 time=0.284 ms
+64 bytes from 192.168.10.3: seq=17 ttl=64 time=0.469 ms
+64 bytes from 192.168.10.3: seq=18 ttl=64 time=0.136 ms
+64 bytes from 192.168.10.3: seq=19 ttl=64 time=0.159 ms
+
+--- 192.168.10.3 ping statistics ---
+20 packets transmitted, 20 packets received, 0% packet loss
+round-trip min/avg/max = 0.040/0.205/0.581 ms
