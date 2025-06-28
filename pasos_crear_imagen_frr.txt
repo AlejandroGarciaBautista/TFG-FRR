@@ -15,3 +15,15 @@ docker exec -it clab-frr-spine-leaf-hosts-ansible-h1 bash
 
 Hacer un build del dockerfile
 docker build -t ansible-station .
+
+Ejecutar ContainerLabs en MAC:
+docker run --rm -it --privileged \
+    --network host \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /var/run/netns:/var/run/netns \
+    -v /etc/hosts:/etc/hosts \
+    -v /var/lib/docker/containers:/var/lib/docker/containers \
+    --pid="host" \
+    -v $(pwd):$(pwd) \
+    -w $(pwd) \
+    ghcr.io/srl-labs/clab bash
