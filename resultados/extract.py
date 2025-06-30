@@ -2,7 +2,7 @@ import os
 import re
 import json
 
-directorio_logs = "./datos"  
+directorio_logs = "."  
 
 
 resultados = {}

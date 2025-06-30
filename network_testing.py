@@ -27,7 +27,7 @@ ns_to_container = {
 
 # Lanzar ping desde un contenedor y namespace
 def lanzar_ping(container, namespace, destino):
-    cmd = f"docker exec {container} ip netns exec {namespace} ping -c 20 {destino}"
+    cmd = f"docker exec {container} ip netns exec {namespace} ping -c 50 {destino}"
     print(f"[PING] {namespace} -> {destino}")
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     return result.stdout + result.stderr

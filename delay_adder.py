@@ -7,8 +7,8 @@ with open("topology.yml", "r") as file:
 
 links = data['topology']['links']
 
-uplink_delay = "0.5ms"
-access_delay = "0.5ms"
+uplink_delay = "1.5ms"
+access_delay = "1.5ms"
 
 for link in links:
     ep1, ep2 = link['endpoints']
@@ -33,3 +33,13 @@ for link in links:
 
     print(f"Ejecutando: {' '.join(cmd1)}")
     subprocess.run(cmd1)
+
+    cmd2 = [
+    "containerlab", "tools", "netem", "set",
+    "-n", f"clab-tfg-frr-ansible-{node2}",
+    "-i", iface2,
+    "--delay", delay
+    ]
+
+    print(f"Ejecutando: {' '.join(cmd2)}")
+    subprocess.run(cmd2)
